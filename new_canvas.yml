@@ -295,3 +295,18 @@
    - name: Yarn Install
      community.general.yarn:
        path: ~/Projects/canvas-lms
+
+   - name: Compile Assets
+     command:
+       cmd: bundle exec rake canvas:compile_assets
+       chdir: ~/Projects/canvas-lms
+
+   - name: Initial Database Setup
+     command:  
+       cmd: bundle exec rake db:initial_setup
+       chdir: ~/Projects/canvas-lms
+     environment:
+       CANVAS_LMS_ADMIN_EMAIL: canvas_admin@example.com 
+       CANVAS_LMS_ADMIN_PASSWORD: "{{ canvas_admin_password }}" 
+       CANVAS_LMS_ACCOUNT_NAME: "development school" 
+       CANVAS_LMS_STATS_COLLECTION: opt_out 
