@@ -6,6 +6,7 @@
      git:
        repo: 'https://github.com/instructure/canvas-lms.git'
        dest: ~/Projects/canvas-lms
+       force: "yes"
 
    - name: Add brightbox/ruby-ng Repo
      apt_repository:
@@ -210,3 +211,12 @@
      command:  
        cmd: bundle _2.1.4_ install --path vendor/bundle
        chdir: ~/Projects/canvas-lms
+
+   - name: Copy default config files
+     copy:
+       src: "{{ item }}"
+       dest: "~/Projects/canvas-lms/config"
+       force: "yes"
+       mode: 06400
+     with_fileglob:
+       - "files/config/*.yml"
