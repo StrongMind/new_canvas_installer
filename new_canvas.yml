@@ -15,6 +15,13 @@
      become: true
      become_user: root
 
+   - name: Add Postgresql Repo key
+     apt_key:
+       url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+       state: present
+     become: true
+     become_user: root
+ 
    - name: Setup Postgresql 9.6 Repo
      apt_repository:
        repo: deb http://apt.postgresql.org/pub/repos/apt/  bionic-pgdg main
@@ -22,9 +29,16 @@
      become: true
      become_user: root
 
-   - name: Sign Postgresql Repo
+   - name: Add Yarn Repo Key
      apt_key:
-       url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+       url: https://dl.yarnpkg.com/debian/pubkey.gpg
+       state: present
+     become: true
+     become_user: root
+
+   - name: Add Yarn Repo
+     apt_repository:
+       repo: deb https://dl.yarnpkg.com/debian/ stable main
        state: present
      become: true
      become_user: root
@@ -211,6 +225,14 @@
      command:  
        cmd: bundle _2.1.4_ install --path vendor/bundle
        chdir: ~/Projects/canvas-lms
+
+   - name: Install Yarn 1.10.1-1
+     apt:
+       name:  yarn=1.10.1-1
+       update_cache: true
+       state: present
+     become: true
+     become_user: root
 
    - name: Copy default config files
      copy:
