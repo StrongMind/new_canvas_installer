@@ -1,0 +1,212 @@
+---
+-  hosts: all
+   gather_facts: no
+   tasks:
+   - name: Git checkout
+     git:
+       repo: 'https://github.com/instructure/canvas-lms.git'
+       dest: ~/Projects/canvas-lms
+
+   - name: Add brightbox/ruby-ng Repo
+     apt_repository:
+       repo: ppa:brightbox/ruby-ng
+       state: present
+     become: true
+     become_user: root
+
+   - name: Setup Postgresql 9.6 Repo
+     apt_repository:
+       repo: deb http://apt.postgresql.org/pub/repos/apt/  bionic-pgdg main
+       state: present
+     become: true
+     become_user: root
+
+   - name: Sign Postgresql Repo
+     apt_key:
+       url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+       state: present
+     become: true
+     become_user: root
+
+   - name: Install postgres 9.6
+     apt:
+       name:  postgresql-9.6
+       update_cache: true
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install software-properties-common
+     apt:
+       name:  software-properties-common
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install ruby2.6
+     apt:
+       name:  ruby2.6
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install ruby2.6-dev
+     apt:
+       name:  ruby2.6-dev
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install zlib1g-dev
+     apt:
+       name:  zlib1g-dev
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install libxml2-dev
+     apt:
+       name:  libxml2-dev
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install libsqlite3-dev
+     apt:
+       name:  libsqlite3-dev
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install libpq-dev
+     apt:
+       name:   libpq-dev
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install libxmlsec1-dev
+     apt:
+       name:   libxmlsec1-dev
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install curl
+     apt:
+       name:   curl
+       state: present 
+     become: true
+     become_user: root
+
+   - name:  Install make
+     apt:
+       name:   make
+       state: present 
+     become: true
+     become_user: root
+
+   - name:  Install g++
+     apt:
+       name:   g++
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Install Python-dev
+     apt:
+       name: python3-dev
+       state: present
+     become: true
+     become_user: root
+
+   - name: Set default python
+     command:  update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
+     become: true
+     become_user: root
+
+   - name: Get Pip
+     get_url:
+       url: https://bootstrap.pypa.io/get-pip.py
+       dest: /root/get-pip.py
+       mode: '0755'
+     become: true
+     become_user: root
+
+   - name: Install Pip
+     command: /root/get-pip.py
+     become: true
+     become_user: root
+
+   - name: Install psycopg2 python package
+     pip:
+       name: psycopg2
+
+   - name: Download node 10.x setup
+     get_url:
+       url: https://deb.nodesource.com/setup_10.x
+       dest: /root/setup_10.x
+       mode: '0755'
+     become: true
+     become_user: root
+
+   - name: Run node 10.x setup
+     command: /root/setup_10.x
+     become: true
+     become_user: root
+
+   - name:  Install NodeJS
+     apt:
+       name:  nodejs
+       state: present 
+     become: true
+     become_user: root
+
+   - name: Copy psql config
+     copy:
+       src: pg_hba.conf
+       dest: /etc/postgresql/9.6/main/pg_hba.conf
+       owner: postgres
+       group: postgres
+       mode: '0640'
+     become: true
+     become_user: root
+
+   - name: Restart service postgresql
+     service:
+       name: postgresql
+       state: restarted
+     become: true
+     become_user: root
+
+   - name: Create Postgresql superuser
+     community.general.postgresql_user:
+       name: "{{ postgres_user }}"
+       role_attr_flags: SUPERUSER
+       login_user: postgres
+       login_host: 127.0.0.1
+
+   - name: Create Postgresql canvas user
+     community.general.postgresql_user:
+       name: canvas
+       password: canvas
+       role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+       login_user: postgres
+       login_host: 127.0.0.1
+
+   - name: Create canvas_production database
+     community.general.postgresql_db:
+       name: canvas_production
+       login_user: postgres
+       login_host: 127.0.0.1
+       owner: canvas
+
+   - name: Install Bundler 2.1.4
+     command:  gem install bundler --version 2.1.4
+     become: true
+     become_user: root
+
+   - name: Bundle
+     command:  
+       cmd: bundle _2.1.4_ install --path vendor/bundle
+       chdir: ~/Projects/canvas-lms

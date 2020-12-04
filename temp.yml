@@ -1,0 +1,10 @@
+---
+-  hosts: all
+   gather_facts: no
+   tasks:
+   - name: Create Postgresql user
+     community.general.postgresql_user:
+       name: "{{ postgres_user }}"
+       role_attr_flags: SUPERUSER
+       login_user: postgres
+       login_host: 127.0.0.1
